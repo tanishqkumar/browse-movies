@@ -28,18 +28,17 @@ export default class SearchForm extends React.Component {
   state = {
     movies: [],
     query: '',
-    // resultsOrNot: false,
+    page: 1,
   }
 
   getData = async () => {
     try {
         if (this.state.query) {
-          const response = await fetch(`https://www.omdbapi.com/?apikey=112e34d6&s=${this.state.query}`)
+          const response = await fetch(`https://www.omdbapi.com/?apikey=112e34d6&s=${this.state.query}&page=${this.state.page}`)
           const json = await response.json()
           if (json.Response === 'False') {
             this.setState({
               movies: [],
-              // resultsOrNot: false,
             })
           }
           // in the future validate here to ensure you're not relying on API
@@ -49,7 +48,32 @@ export default class SearchForm extends React.Component {
             const arrOfObjs = Object.values(keyValues)
             this.setState({
               movies: arrOfObjs,
-              // resultsOrNot: true,
+            })
+          }
+        }
+      } catch(err) {
+        // change this to pop an alert with the error if there ever is one as the user can't see the console
+        console.log(err)
+      }
+  }
+
+  getMoreData = async () => {
+    try {
+        if (this.state.query) {
+          const response = await fetch(`https://www.omdbapi.com/?apikey=112e34d6&s=${this.state.query}&page=${this.state.page}`)
+          const json = await response.json()
+          if (json.Response === 'False') {
+            this.setState({
+              movies: [],
+            })
+          }
+          // in the future validate here to ensure you're not relying on API
+          // when I fucked up the backticks we got a response without .Search which then led to a .values error
+          else {
+            const keyValues = json.Search
+            const arrOfObjs = Object.values(keyValues)
+            this.setState({
+              movies: [...this.state.movies, ...arrOfObjs],
             })
           }
         }
@@ -62,7 +86,10 @@ export default class SearchForm extends React.Component {
 // getData as a pure function would be better without getting state involved at all
 // getData() returns something after invoking the function, as opposed to without which is just naming the function--arrow vs regular understand
   handleChangeText = query => {
-    this.setState({query}, this.getData
+    this.setState({
+      page: 1,
+      query: query,
+    }, this.getData
   )}
 
   firstToUpper = (str) => {
@@ -94,9 +121,18 @@ renderSearchBar = () => {
           value={this.state.query}
           onChangeText={this.handleChangeText}
           placeholder="Movie or series name"
+          autoFocus={true}
           />
       </KeyboardAvoidingView>
     </View>
+  )
+}
+
+moreDataOnScroll = () => {
+    this.setState({
+      page: this.state.page + 1,
+    }, () =>
+    this.getMoreData(),
   )
 }
 
@@ -105,22 +141,29 @@ renderSearchBar = () => {
 // use IFFEs for immediate returns
     render () {
       return (
-        <View>
-        {this.state.query === '' ?     <View style={styles.container}>
+        <View style={styles.container}>
+        {this.state.query === '' ?
+        <View style={{
+          alignItems: 'center',
+        }}>
                   <TextInput
                   style={styles.input}
                   value={this.state.query}
                   onChangeText={this.handleChangeText}
                   placeholder="Movie or series name"
                   />
-        </View> : <FlatList
+          </View>
+        :
+        <FlatList
                 ListHeaderComponent={this.renderSearchBar}
                 data={this.state.movies}
                 renderItem={this.renderItem}
                 keyExtractor={item => item.imdbID}
+                onEndReached={this.moreDataOnScroll}
+                onEndThreshold={0.1}
                 />
               }
-          </View>
+        </View>
       )
     }
   }
@@ -135,7 +178,7 @@ renderSearchBar = () => {
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      alignItems: 'center',
+      // alignItems: 'center',
       justifyContent: 'center',
     },
     row: {
@@ -148,7 +191,7 @@ renderSearchBar = () => {
       marginTop: 10,
       marginBottom: 10,
       marginHorizontal: 10,
-      paddingHorizontal: 15,
+      paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 25,
     },
