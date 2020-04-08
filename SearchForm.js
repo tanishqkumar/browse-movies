@@ -1,28 +1,16 @@
 import React from 'react'
-import { Button, KeyboardAvoidingView, FlatList, TouchableOpacity, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Button, Platform, KeyboardAvoidingView, FlatList, TouchableOpacity, StyleSheet, Text, TextInput, View } from 'react-native'
 import { ListItem } from 'react-native-elements'
-// import Row from './Row'
-import * as Svg from 'react-native-svg'
+import { NavigationContainer, useNavigation } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { SvgUri } from 'react-native-svg'
 
 // this is the form that we pass into the searchScreen which is what we render as one of two screens in the App.js tabNavigator
+// svg technically hard and RN is new and so the accessibility isn't there to abstract it away cleanly and easily at scale
+// tried local and then remote and then found remote url by going on inspect->network->xhr is like HTTP req shows all the reqs moving back and forth
+// then deleting files from internal change to avoid crash
 
-// Svg
-// class SvgEl extends React.Component {
-//   state = {
-//     showing: true,
-//   }
-//
-//   render() {
-//     return (
-//       <View>
-//       <Svg
-//           add code here
-//           </Svg>
-//       </View>
-//     )
-//   }
-// }
-
+// also a bug when you type in 'win win win'
 
 export default class SearchForm extends React.Component {
   state = {
@@ -99,17 +87,24 @@ export default class SearchForm extends React.Component {
     else return ''
   }
 
+// makes sense to pass in props to a route when you navigate their obviously
 // abstract out the renderItem so I can render a ListItem component and customize how each movie looks when displayed
+// you could implement getData() here before navigating, but then you run into problems with race conditions
+// look up docs and see titelstyle and then add fontweight as if it's a styles.el
 renderItem = ({ item }) => (
-  <ListItem
-    title={this.firstToUpper(item.Title)}
-    subtitle={this.firstToUpper(item.Type) + ' (' + item.Year + ')'}
-    rightAvatar={{
-      source: item.Poster && { uri: item.Poster }, rounded: false, size: "large",
-    }}
-    bottomDivider
-    chevron
-  />
+      <ListItem
+      title={this.firstToUpper(item.Title)}
+      titleStyle={{fontWeight: "bold"}}
+      subtitle={this.firstToUpper(item.Type) + ' (' + item.Year + ')'}
+      rightAvatar={{
+        source: item.Poster && { uri: item.Poster }, rounded: false, size: "large",
+      }}
+      bottomDivider
+      chevron
+      onPress = {() => this.props.navigation.navigate('Movie Details', {
+        item: item,
+      })}
+    />
 )
 
 renderSearchBar = () => {
@@ -141,16 +136,30 @@ moreDataOnScroll = () => {
 // use IFFEs for immediate returns
     render () {
       return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+      behavior={Platform.Os == "ios" ? "padding" : "height"} style={styles.container}>
         {this.state.query === '' ?
         <View style={{
           alignItems: 'center',
         }}>
+          <View style={{
+            top: 160,
+          }}>
                   <TextInput
                   style={styles.input}
                   value={this.state.query}
                   onChangeText={this.handleChangeText}
                   placeholder="Movie or series name"
+                  />
+          </View>
+                  <SvgUri
+                    width='325'
+                    height='325'
+                    uri="https://42f2671d685f51e10fc6-b9fcecea3e50b3b59bdc28dead054ebc.ssl.cf5.rackcdn.com/illustrations/home_cinema_l7yl.svg"
+                    style={{
+                      position: 'absolute',
+                      bottom: -70,
+                    }}
                   />
           </View>
         :
@@ -163,7 +172,7 @@ moreDataOnScroll = () => {
                 onEndThreshold={0.1}
                 />
               }
-        </View>
+        </KeyboardAvoidingView>
       )
     }
   }
@@ -178,8 +187,8 @@ moreDataOnScroll = () => {
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      // alignItems: 'center',
       justifyContent: 'center',
+      // top: 100,
     },
     row: {
       padding: 20,
@@ -188,11 +197,11 @@ moreDataOnScroll = () => {
       borderWidth: 1,
       borderColor: 'black',
       minWidth: 100,
-      marginTop: 10,
-      marginBottom: 10,
-      marginHorizontal: 10,
-      paddingHorizontal: 20,
-      paddingVertical: 10,
+      // marginTop: 10,
+      // marginBottom: 10,
+      // marginHorizontal: 10,
+      paddingHorizontal: 20 * 1.2,
+      paddingVertical: 10 * 1.2,
       borderRadius: 25,
     },
   })
