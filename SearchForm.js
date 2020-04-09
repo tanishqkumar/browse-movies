@@ -154,8 +154,8 @@ moreDataOnScroll = () => {
                   />
           </View>
                   <SvgUri
-                    width='325'
-                    height='325'
+                    width='250'
+                    height='250'
                     uri="https://42f2671d685f51e10fc6-b9fcecea3e50b3b59bdc28dead054ebc.ssl.cf5.rackcdn.com/illustrations/home_cinema_l7yl.svg"
                     style={{
                       position: 'absolute',

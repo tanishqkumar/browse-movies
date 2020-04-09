@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "movies",
-    "slug": "movies",
+    "name": "movie-browser",
+    "slug": "movie-browser",
     "platforms": [
       "ios",
       "android",
@@ -23,6 +23,8 @@
     ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "description": "Cross-platform mobile app that hits openMovie database to search for and display information about movies, made with React Native on Expo. ",
+    "githubUrl": "https://github.com/tanishqkumar/movie-browser.git"
   }
 }
