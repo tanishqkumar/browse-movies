@@ -1,9 +1,5 @@
 import React from 'react'
-import { Image, Button, StyleSheet, Text, TextInput, View, Dimensions } from 'react-native'
-
-// need to fetch data on different API path and then render it on detailView based on title
-// this is a copied fetch to get data like this
-
+import { Image, Button, StyleSheet, Text, TextInput, View, Dimensions, ScrollView } from 'react-native'
 
 export default class DetailScreen extends React.Component {
 // we want to render an image and below it a bunch of information about the movie, including a description and ratings
@@ -57,19 +53,100 @@ componentDidMount() {
 // default sizes are made smaller from image libararies like s3 since they want to limit bandwith and so .replace is very clever to get better images
 // anytime you're inside a JSX element if you're already writing js feel free to use the ternary freely
 // note clever use of view as a bar, and use 70% as opposed to a fraction of dimension.getScreen
+
+// pass in a rating object and it returns a
+toPercent = (rating) => {
+  const fractionScreen = 0.9
+  if (rating.Source === "Internet Movie Database" || rating.Source === "Metacritic") {
+    return (((Math.round(eval(rating.Value) * 1e4) / 1e2) * fractionScreen) + '%')
+  } else {
+    return (parseInt(rating.Value) * fractionScreen) + '%'
+  }
+}
+
+firstToUpper = (str) => {
+  if (typeof(str) === 'string') {
+    return str.charAt(0).toUpperCase() + str.substring(1)
+  }
+  else return ''
+}
+
   render() {
     // make sure each value in this arr is 0-100
     // map percentArr to a bunch of <View> JSX elements where they are paired for title and length
-    // const percentArr = this.state.movie.Ratings
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <Image source={{
           uri:  this.state.movie.Poster ? this.state.movie.Poster.replace('sx300', 'sx500') : undefined
         }} style={styles.image}/>
-          <Text>{this.state.movie.Title} {this.state.movie.Type}</Text>
-          <Text>{this.state.movie.Plot} {this.state.movie.Awards}</Text>
-        { /* <View style={{backgroundColor: '#0f0', width: percentArr[0] + '%', height: 20}}></View> */ }
-      </View>
+
+              <Text style={{
+                  margin: 5,
+                  marginLeft: 10,
+                  fontWeight: "600",
+                  fontSize: 32,
+              }}>
+              {this.state.movie.Title} {this.state.movie.Year ? '(' + this.state.movie.Year + ')' : null}
+              </Text>
+
+              <Text style={{
+                  marginLeft: 10,
+                  fontSize: 18,
+              }}>{this.state.movie.Rated === 'N/A' || !this.state.movie.Rated ?
+              null: this.state.movie.Rated
+            } {this.state.movie.Runtime ? '(' + this.state.movie.Runtime + ')' : null}</Text>
+
+              <Text style={{
+                 margin: 5,
+                  marginLeft: 10,
+                  fontSize: 24,
+              }}>{this.state.movie.Awards === 'N/A' || !this.state.movie.Awards ?
+                null : this.state.movie.Awards
+                  }</Text>
+
+            <Text style={{
+                marginLeft: 10,
+                fontStyle: "italic",
+                fontSize: 18,
+            }}>{this.state.movie.Plot === 'N/A' || !this.state.movie.Plot ?
+              null : this.state.movie.Plot
+                }</Text>
+
+          { this.state.movie.Ratings ?
+            this.state.movie.Ratings.map(rating =>
+              <View>
+                <Text style={{
+                    margin: 10,
+                    marginLeft: 10,
+                    fontWeight: 'bold',
+                    fontSize: 18,
+                }}
+                >{rating.Source}: {rating.Value}</Text>
+                <View style={{
+                  backgroundColor: '#6C63FF',
+                  width: this.toPercent(rating),
+                  height: 20,
+                  borderRadius: 3,
+                  marginLeft: 10,
+                  margin: 3,
+              }}>
+                </View>
+              </View>
+        ) : null
+          }
+          { this.state.movie.BoxOffice === "N/A" || !this.state.movie.BoxOffice ? null :
+              <Text style={{
+                  margin: 20,
+                  marginLeft: 10,
+                  fontSize: 28,
+                  textAlign: "center",
+                  borderWidth: 1,
+                  borderColor: 'black',
+                  padding: 5,
+                  borderRadius: 10,
+              }}>Grossed {this.state.movie.BoxOffice}</Text>
+        }
+      </ScrollView>
     )
 }
   }

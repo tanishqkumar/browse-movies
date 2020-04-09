@@ -60,6 +60,7 @@ export default class SearchForm extends React.Component {
           else {
             const keyValues = json.Search
             const arrOfObjs = Object.values(keyValues)
+            console.log(arrOfObjs)
             this.setState({
               movies: [...this.state.movies, ...arrOfObjs],
             })
@@ -197,9 +198,6 @@ moreDataOnScroll = () => {
       borderWidth: 1,
       borderColor: 'black',
       minWidth: 100,
-      // marginTop: 10,
-      // marginBottom: 10,
-      // marginHorizontal: 10,
       paddingHorizontal: 20 * 1.2,
       paddingVertical: 10 * 1.2,
       borderRadius: 25,
